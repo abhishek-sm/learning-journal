@@ -9,15 +9,21 @@ export const revalidate = 60;
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const category = await getCategoryBySlug(params.slug);
+  const { slug } = await params;
+  const category = await getCategoryBySlug(slug);
   if (!category) return {};
   return { title: category.name, description: category.description ?? undefined };
 }
 
-export default async function CategoryPage({ params }: { params: { slug: string } }) {
-  const category = await getCategoryBySlug(params.slug);
+export default async function CategoryPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const category = await getCategoryBySlug(slug);
   if (!category) notFound();
 
   const articles = await getArticlesByCategory(category.id);

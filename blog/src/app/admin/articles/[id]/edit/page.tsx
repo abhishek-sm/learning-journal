@@ -2,10 +2,15 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ArticleForm } from "../../article-form";
 
-export default async function EditArticlePage({ params }: { params: { id: string } }) {
+export default async function EditArticlePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   const [article, categories] = await Promise.all([
     prisma.article.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { tags: true },
     }),
     prisma.category.findMany({
