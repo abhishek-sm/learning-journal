@@ -1,10 +1,9 @@
 "use client";
 
-import { useActionState, useFormStatus } from "react";
+import { useState, useTransition } from "react";
 import { loginAction } from "@/actions/auth";
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
+function SubmitButton({ pending }: { pending: boolean }) {
   return (
     <button
       type="submit"
@@ -17,7 +16,18 @@ function SubmitButton() {
 }
 
 export default function LoginPage() {
-  const [state, formAction] = useActionState(loginAction, undefined);
+  const [state, setState] = useState<{ error?: string } | undefined>(undefined);
+  const [isPending, startTransition] = useTransition();
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+
+    startTransition(async () => {
+      const result = await loginAction(undefined, formData);
+      setState(result);
+    });
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-6">
@@ -26,7 +36,7 @@ export default function LoginPage() {
         <p className="mb-6 text-sm text-muted-foreground">
           This area is private — only the site owner can log in.
         </p>
-        <form action={formAction} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="mb-1.5 block text-sm">Email</label>
             <input
@@ -46,7 +56,7 @@ export default function LoginPage() {
             />
           </div>
           {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
-          <SubmitButton />
+          <SubmitButton pending={isPending} />
         </form>
       </div>
     </div>
