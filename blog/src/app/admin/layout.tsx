@@ -2,6 +2,9 @@ import Link from "next/link";
 import { logoutAction } from "@/actions/auth";
 import { LayoutDashboard, FileText, FolderTree, FileEdit, Settings, LogOut } from "lucide-react";
 
+// Admin pages query mutable Prisma data and must never be prerendered at build time.
+export const dynamic = "force-dynamic";
+
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/articles", label: "Articles", icon: FileText },
