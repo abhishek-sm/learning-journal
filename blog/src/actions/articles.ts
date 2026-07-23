@@ -1,10 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { slugify, computeReadingTime } from "@/lib/utils";
+import { revalidateArticleContent } from "@/lib/revalidation";
 
 type ArticleInput = {
   title: string;
@@ -55,8 +55,7 @@ export async function createArticle(input: ArticleInput) {
     },
   });
 
-  revalidatePath("/admin/articles");
-  revalidatePath("/articles");
+  revalidateArticleContent();
   redirect(`/admin/articles/${article.id}/edit`);
 }
 
@@ -84,16 +83,13 @@ export async function updateArticle(id: string, input: ArticleInput) {
     },
   });
 
-  revalidatePath("/admin/articles");
-  revalidatePath("/articles");
-  revalidatePath(`/article/${existing.slug}`);
+  revalidateArticleContent();
 }
 
 export async function deleteArticle(id: string) {
   await requireAdmin();
   await prisma.article.delete({ where: { id } });
-  revalidatePath("/admin/articles");
-  revalidatePath("/articles");
+  revalidateArticleContent();
 }
 
 export async function togglePublish(id: string, published: boolean) {
@@ -102,6 +98,5 @@ export async function togglePublish(id: string, published: boolean) {
     where: { id },
     data: { published, publishedAt: published ? new Date() : null },
   });
-  revalidatePath("/admin/articles");
-  revalidatePath("/articles");
+  revalidateArticleContent();
 }

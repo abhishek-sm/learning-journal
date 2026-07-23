@@ -1,9 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
+import {
+  revalidateArticleContent,
+  revalidateCategoryContent,
+} from "@/lib/revalidation";
 
 export async function createCategory(formData: FormData) {
   await requireAdmin();
@@ -16,8 +19,7 @@ export async function createCategory(formData: FormData) {
     data: { name, slug, parentId: parentId || undefined },
   });
 
-  revalidatePath("/admin/categories");
-  revalidatePath("/categories");
+  revalidateCategoryContent();
 }
 
 export async function renameCategory(id: string, name: string) {
@@ -27,8 +29,7 @@ export async function renameCategory(id: string, name: string) {
     where: { id },
     data: { name: name.trim(), slug: slugify(name) },
   });
-  revalidatePath("/admin/categories");
-  revalidatePath("/categories");
+  revalidateCategoryContent();
 }
 
 export async function deleteCategory(id: string) {
@@ -44,8 +45,7 @@ export async function deleteCategory(id: string) {
     throw new Error("This category still has subcategories. Delete or move those first.");
   }
   await prisma.category.delete({ where: { id } });
-  revalidatePath("/admin/categories");
-  revalidatePath("/categories");
+  revalidateCategoryContent();
 }
 
 export async function moveArticleToCategory(articleId: string, categoryId: string) {
@@ -54,8 +54,7 @@ export async function moveArticleToCategory(articleId: string, categoryId: strin
     where: { id: articleId },
     data: { categoryId },
   });
-  revalidatePath("/admin/articles");
-  revalidatePath("/articles");
+  revalidateArticleContent();
 }
 
 export async function getCategoryTree() {
