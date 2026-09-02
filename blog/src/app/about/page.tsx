@@ -1,30 +1,47 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { getSiteCopy } from "@/lib/site-copy";
 
 export const metadata: Metadata = { title: "About" };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const siteCopy = await getSiteCopy();
+  const paragraphs = siteCopy.aboutBody.split(/\n\s*\n/).filter(Boolean);
+
+  const ctaText = siteCopy.aboutCta.trim();
+  const hasCategoryLink = ctaText.toLowerCase().includes("category");
+  const hasArticlesLink = ctaText.toLowerCase().includes("latest articles");
+
+  const renderCta = () => {
+    if (!hasCategoryLink || !hasArticlesLink) {
+      return <p>{ctaText}</p>;
+    }
+
+    const categoryIndex = ctaText.toLowerCase().indexOf("category");
+    const articlesIndex = ctaText.toLowerCase().indexOf("latest articles");
+    const beforeCategory = ctaText.slice(0, categoryIndex).trimEnd();
+    const betweenCategoryAndArticles = ctaText.slice(categoryIndex + "category".length, articlesIndex).trim();
+    const afterArticles = ctaText.slice(articlesIndex + "latest articles".length).trim();
+
+    return (
+      <p>
+        {beforeCategory}
+        {" "}
+        <Link href="/categories">category</Link>
+        {betweenCategoryAndArticles ? ` ${betweenCategoryAndArticles}` : ""}
+        {" "}
+        <Link href="/articles">latest articles</Link>
+        {afterArticles ? ` ${afterArticles}` : ""}
+      </p>
+    );
+  };
+
   return (
     <div className="container max-w-2xl py-20">
       <h1 className="mb-8 text-3xl font-semibold tracking-tight md:text-4xl">About</h1>
       <div className="prose-article">
-        <p>
-          I&apos;m a software engineer who is endlessly curious — about how things
-          work, why they work that way, and what happens at the edges of what I
-          already understand.
-        </p>
-        <p>
-          This site is my personal learning journal: a place where I write down
-          what I&apos;m learning, whether that&apos;s a physics idea I finally understood,
-          a programming pattern worth remembering, or a book that changed how I
-          think. It isn&apos;t polished for an audience — it&apos;s polished for my
-          future self, so ideas don&apos;t evaporate the moment I move on to the next
-          thing.
-        </p>
-        <p>
-          If you&apos;ve found your way here, welcome. Browse by{" "}
-          <a href="/categories">category</a>, or start with the{" "}
-          <a href="/articles">latest articles</a>.
-        </p>
+        {paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+        {renderCta()}
       </div>
     </div>
   );

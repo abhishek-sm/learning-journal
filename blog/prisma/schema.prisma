@@ -19,6 +19,10 @@ model User {
   email        String   @unique
   passwordHash String
   name         String   @default("Admin")
+  homeTitle    String   @default("My Learning Journal")
+  homeSubtitle String   @default("A living archive of what I'm learning — physics, biology, programming, philosophy, and everything in between. Written to be reread.")
+  aboutBody    String   @db.Text @default("I'm a software engineer who is endlessly curious — about how things work, why they work that way, and what happens at the edges of what I already understand.\n\nThis site is my personal learning journal: a place where I write down what I'm learning, whether that's a physics idea I finally understood, a programming pattern worth remembering, or a book that changed how I think. It isn't polished for an audience — it's polished for my future self, so ideas don't evaporate the moment I move on to the next thing.")
+  aboutCta     String   @default("If you've found your way here, welcome. Browse by category, or start with the latest articles.")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

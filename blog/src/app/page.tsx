@@ -6,15 +6,17 @@ import {
   getLatestArticles,
   getTopLevelCategoriesWithCounts,
 } from "@/lib/queries";
+import { getSiteCopy } from "@/lib/site-copy";
 import { ArrowRight } from "lucide-react";
 
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [featured, latest, categories] = await Promise.all([
+  const [featured, latest, categories, siteCopy] = await Promise.all([
     getFeaturedArticle(),
     getLatestArticles(6),
     getTopLevelCategoriesWithCounts(),
+    getSiteCopy(),
   ]);
 
   return (
@@ -22,12 +24,9 @@ export default async function HomePage() {
       {/* Hero */}
       <section className="flex flex-col items-start gap-6 py-20 md:py-28">
         <h1 className="max-w-2xl text-4xl font-semibold leading-[1.1] tracking-tight md:text-6xl">
-          My Learning Journal
+          {siteCopy.homeTitle}
         </h1>
-        <p className="max-w-xl text-lg text-muted-foreground">
-          A living archive of what I&apos;m learning — physics, biology, programming,
-          philosophy, and everything in between. Written to be reread.
-        </p>
+        <p className="max-w-xl text-lg text-muted-foreground">{siteCopy.homeSubtitle}</p>
         <Link
           href="/articles"
           className="mt-2 inline-flex items-center gap-2 rounded-md bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
